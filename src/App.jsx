@@ -57,8 +57,24 @@ export default function AlbumTrackFinder() {
         const trackList = text
           .split('\n')
           .filter(line => line.trim())
-          .map(line => line.replace(/^\d+\.\s*/, '').trim())
-          .filter(line => line.length > 0);
+          .map((line, index) => {
+            const trimmedLine = line.trim();
+            // Try to extract track number from the beginning of the line
+            const match = trimmedLine.match(/^(\d+)\.\s*(.+)$/);
+            if (match) {
+              return {
+                number: parseInt(match[1], 10),
+                name: match[2].trim()
+              };
+            } else {
+              // If no number found, use index + 1 as fallback
+              return {
+                number: index + 1,
+                name: trimmedLine
+              };
+            }
+          })
+          .filter(track => track.name.length > 0);
         
         setTracks(trackList);
       }
@@ -184,8 +200,8 @@ export default function AlbumTrackFinder() {
                   key={index}
                   className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  <span className="text-purple-600 font-bold w-8">{index + 1}</span>
-                  <span className="text-gray-800">{track}</span>
+                  <span className="text-purple-600 font-bold w-8">{track.number}</span>
+                  <span className="text-gray-800">{track.name}</span>
                 </div>
               ))}
             </div>
