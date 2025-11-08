@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Music, Search, Loader2, Eye, EyeOff } from 'lucide-react';
+import './App.css';
 
 export default function AlbumTrackFinder() {
   const [apiKey, setApiKey] = useState('');
@@ -92,116 +93,144 @@ export default function AlbumTrackFinder() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
-      <div className="max-w-2xl mx-auto pt-8">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Music className="w-8 h-8 text-purple-600" />
-            <h1 className="text-3xl font-bold text-gray-800">Album Track Finder</h1>
+    <div className="app-container">
+      <div className="app-wrapper">
+        {/* Header Card */}
+        <div className="header-card">
+          <div className="header-content">
+            <div className="icon-container">
+              <Music />
+            </div>
+            <div className="title-section">
+              <h1>Album Track Finder</h1>
+              <p>Discover track listings instantly</p>
+            </div>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="form-section">
+            <div className="form-group">
+              <label className="form-label">
                 Gemini API Key
               </label>
-              <div className="relative">
+              <div className="input-wrapper">
                 <input
                   type={showKey ? "text" : "password"}
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter your Gemini API key"
-                  className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
+                  className="form-input"
                 />
                 <button
                   onClick={() => setShowKey(!showKey)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  className="toggle-button"
                   type="button"
+                  aria-label={showKey ? "Hide API key" : "Show API key"}
                 >
-                  {showKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showKey ? <EyeOff /> : <Eye />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="help-text">
                 Get your free API key from{' '}
                 <a 
                   href="https://makersuite.google.com/app/apikey" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-purple-600 hover:underline"
+                  className="help-link"
                 >
                   Google AI Studio
                 </a>
               </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Artist Name
-              </label>
-              <input
-                type="text"
-                value={artist}
-                onChange={(e) => setArtist(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="e.g., The Beatles"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-              />
-            </div>
+            <div className="form-grid">
+              <div className="form-group">
+                <label className="form-label">
+                  Artist Name
+                </label>
+                <input
+                  type="text"
+                  value={artist}
+                  onChange={(e) => setArtist(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="e.g., The Beatles"
+                  className="form-input"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Album Name
-              </label>
-              <input
-                type="text"
-                value={album}
-                onChange={(e) => setAlbum(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="e.g., Abbey Road"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-              />
+              <div className="form-group">
+                <label className="form-label">
+                  Album Name
+                </label>
+                <input
+                  type="text"
+                  value={album}
+                  onChange={(e) => setAlbum(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="e.g., Abbey Road"
+                  className="form-input"
+                />
+              </div>
             </div>
 
             <button
               onClick={fetchTracks}
               disabled={loading}
-              className="w-full bg-purple-600 text-white py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="submit-button"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Searching...
+                  <Loader2 className="spin" />
+                  <span>Searching...</span>
                 </>
               ) : (
                 <>
-                  <Search className="w-5 h-5" />
-                  Find Tracks
+                  <Search />
+                  <span>Find Tracks</span>
                 </>
               )}
             </button>
           </div>
         </div>
 
+        {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
+          <div className="error-message">
+            <div className="error-content">
+              <svg className="error-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <p className="error-text">{error}</p>
+            </div>
           </div>
         )}
 
+        {/* Track List */}
         {tracks.length > 0 && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              {album} by {artist}
-            </h2>
-            <div className="space-y-2">
+          <div className="tracks-card">
+            <div className="tracks-header">
+              <h2 className="tracks-title">
+                {album}
+              </h2>
+              <p className="tracks-artist">
+                by {artist}
+              </p>
+              <p className="tracks-count">
+                {tracks.length} {tracks.length === 1 ? 'track' : 'tracks'}
+              </p>
+            </div>
+            <div className="tracks-list">
               {tracks.map((track, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="track-item"
                 >
-                  <span className="text-purple-600 font-bold w-8">{track.number}</span>
-                  <span className="text-gray-800">{track.name}</span>
+                  <div className="track-number">
+                    <span>{track.number}</span>
+                  </div>
+                  <span className="track-name">
+                    {track.name}
+                  </span>
                 </div>
               ))}
             </div>
