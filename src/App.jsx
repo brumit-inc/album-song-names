@@ -38,7 +38,17 @@ export default function AlbumTrackFinder() {
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `List all the track names from the album "${album}" by ${artist}. Provide ONLY the track names, one per line, numbered. Do not include any additional information, explanations, or commentary. If you don't know the exact tracklist, please say "I don't have information about this album."`
+                text: `You are a music database assistant.
+                List the official tracklist for the studio album "${album}" by ${artist}.
+                Requirements:
+                - Use the original standard release (not deluxe, remastered, live, or bonus editions)
+                - Preserve the correct track order
+                - Provide ONLY the track names
+                - One track per line
+                - Number each track starting from 1
+                - Do NOT include any commentary, years, or extra text
+                If you are not confident in the exact official tracklist, reply exactly with:
+                "I don't have information about this album."`
               }]
             }]
           })
