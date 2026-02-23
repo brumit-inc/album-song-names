@@ -27,18 +27,10 @@ export default function AlbumTrackFinder() {
     setTracks([]);
 
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{
-                text: `You are a music database assistant.
+    const requestBody = {
+      contents: [{
+        parts: [{
+          text: `You are a music database assistant.
                 List the official tracklist for the studio album "${album}" by ${artist}.
                 Requirements:
                 - Use the original standard release (not deluxe, remastered, live, or bonus editions)
@@ -49,46 +41,65 @@ export default function AlbumTrackFinder() {
                 - Do NOT include any commentary, years, or extra text
                 If you are not confident in the exact official tracklist, reply exactly with:
                 "I don't have information about this album."`
-              }]
-            }]
-          })
+        }]
+      }]
+    };
+
+    const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    let response;
+    let lastError;
+
+    for (const model of modelsToTry) {
+      response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
+          },
+          body: JSON.stringify(requestBody),
         }
       );
+      if (response.ok) break;
+      lastError = response.status;
+      if (response.status !== 404) break;
+    }
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch from Gemini API. Please check your API key.');
-      }
+    if (!response.ok) {
+      const msg = lastError === 404
+        ? 'Gemini model not found. Please check your API key at Google AI Studio (ai.google.dev).'
+        : 'Failed to fetch from Gemini API. Please check your API key.';
+      throw new Error(msg);
+    }
 
-      const data = await response.json();
-      const text = data.candidates[0]?.content?.parts[0]?.text || '';
-      
-      if (text.includes("don't have information") || text.includes("don't know")) {
-        setError('Album not found. Please check the artist and album name.');
-      } else {
-        const trackList = text
-          .split('\n')
-          .filter(line => line.trim())
-          .map((line, index) => {
-            const trimmedLine = line.trim();
-            // Try to extract track number from the beginning of the line
-            const match = trimmedLine.match(/^(\d+)\.\s*(.+)$/);
-            if (match) {
-              return {
-                number: parseInt(match[1], 10),
-                name: match[2].trim()
-              };
-            } else {
-              // If no number found, use index + 1 as fallback
-              return {
-                number: index + 1,
-                name: trimmedLine
-              };
-            }
-          })
-          .filter(track => track.name.length > 0);
-        
-        setTracks(trackList);
-      }
+    const data = await response.json();
+    const text = data.candidates[0]?.content?.parts[0]?.text || '';
+
+    if (text.includes("don't have information") || text.includes("don't know")) {
+      setError('Album not found. Please check the artist and album name.');
+    } else {
+      const trackList = text
+        .split('\n')
+        .filter(line => line.trim())
+        .map((line, index) => {
+          const trimmedLine = line.trim();
+          const match = trimmedLine.match(/^(\d+)\.\s*(.+)$/);
+          if (match) {
+            return {
+              number: parseInt(match[1], 10),
+              name: match[2].trim()
+            };
+          }
+          return {
+            number: index + 1,
+            name: trimmedLine
+          };
+        })
+        .filter(track => track.name.length > 0);
+
+      setTracks(trackList);
+    }
     } catch (err) {
       setError(err.message || 'An error occurred while fetching tracks');
     } finally {
